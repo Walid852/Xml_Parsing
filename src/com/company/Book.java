@@ -9,7 +9,7 @@ public class Book {
     String Title;
     String Genre;
     double Price=0.0;
-    Date Publish_Date;
+    String Publish_Date;
     String Description;
 
     public String getID() {
@@ -52,11 +52,11 @@ public class Book {
         Price = price;
     }
 
-    public Date getPublish_Date() {
+    public String getPublish_Date() {
         return Publish_Date;
     }
 
-    public void setPublish_Date(Date publish_Date) {
+    public void setPublish_Date(String publish_Date) {
         Publish_Date = publish_Date;
     }
 
@@ -81,7 +81,7 @@ public class Book {
                 '}';
     }
 
-    public Book(String ID, String author, String title, String genre, double price, Date publish_Date, String description) {
+    public Book(String ID, String author, String title, String genre, double price, String publish_Date, String description) {
         this.ID = ID;
         Author = author;
         Title = title;

@@ -3,6 +3,7 @@ package com.company;
 import org.w3c.dom.*;
 
 import java.io.*;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -21,6 +22,7 @@ import javax.xml.transform.stream.StreamResult;
 
 public class Main {
     static Document xmlDocument = null;
+    static String dateFormat="dd/MM/yyyy";
     static void Menu(){
         System.out.println("1-insert Books");
         System.out.println("2-Search Books");
@@ -60,6 +62,27 @@ public class Main {
     static void TypeOfSortedMenu(){
         System.out.println("1-ASE");
         System.out.println("2-DES");
+    }
+    public static boolean isNumeric(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            double d = Double.parseDouble(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+    public static boolean isValid(String dateStr) {
+        DateFormat sdf = new SimpleDateFormat(dateFormat);
+        sdf.setLenient(false);
+        try {
+            sdf.parse(dateStr);
+        } catch (ParseException e) {
+            return false;
+        }
+        return true;
     }
     private static List<Book> SearchBooksByTitle(String Title,List<Book> AllBooks){
         List<Book> Result = new ArrayList<Book>();
@@ -106,10 +129,10 @@ public class Main {
         }
         return Result;
     }
-    private static List<Book> SearchBooksByPublishDate(Date Publish_Date, List<Book> AllBooks){
+    private static List<Book> SearchBooksByPublishDate(String Publish_Date, List<Book> AllBooks){
         List<Book> Result = new ArrayList<Book>();
         for (Book book:AllBooks) {
-            if(book.Publish_Date.after(Publish_Date)){
+            if(book.Publish_Date.equals(Publish_Date)){
                 Result.add(book);
             }
         }
@@ -215,10 +238,8 @@ public class Main {
                     double Price = Double.parseDouble(elem.getElementsByTagName("Price").item(0)
                             .getChildNodes().item(0).getNodeValue());
 
-                    String stringDate = elem.getElementsByTagName("Publish_Date")
+                    String Publish_Date = elem.getElementsByTagName("Publish_Date")
                             .item(0).getChildNodes().item(0).getNodeValue();
-
-                    Date Publish_Date=new SimpleDateFormat("dd/MM/yyyy").parse("20/12/2020");
                     String Description = elem.getElementsByTagName("Description").item(0)
                             .getChildNodes().item(0).getNodeValue();
 
@@ -227,9 +248,7 @@ public class Main {
                     books.add(new Book(ID, Author, Title, Genre,Price,Publish_Date,Description));
                 }
             }
-            for (Book book : books) {
-                System.out.println(book.toString());
-            }
+
 
         } catch (Exception ignored) {
         }
@@ -300,7 +319,7 @@ public class Main {
         while (true) {
             Scanner scanner = new Scanner(System.in);
             List<Book> InsertedBooks =new ArrayList<Book>();
-            if (resultSearch.size()<=1){
+           /* if (resultSearch.size()<=1){
                 if (resultSearch.size() > 0) {
                     System.out.println("Number of Books: "+resultSearch.size());
                     for (Book book : resultSearch) {
@@ -311,7 +330,7 @@ public class Main {
                     System.out.println("No Books");
                 }
                 break;
-            }
+            }*/
             Menu();
             int option = scanner.nextInt();
             if (option == 1) {
@@ -348,10 +367,27 @@ public class Main {
                         else System.out.println("please enter 1,2,3");
                     }
                     System.out.println("Price");
-                    double Price = scanner.nextDouble();
-                    System.out.println("stringDate");
-                    String stringDate = scanner.next();
-                    Date Publish_Date=new SimpleDateFormat("dd/MM/yyyy").parse(stringDate);
+                    double Price = 0.0;
+                    while (true) {
+                        String Price_input = scanner.next();
+                        if (isNumeric(Price_input)) {
+                            Price = Double.parseDouble(Price_input);
+                            break;
+                        }
+                        else {
+                            System.out.println("please enter number");
+                        }
+                    }
+                    String Publish_Date=null;
+                    while (true) {
+                        System.out.println("Enter Date in format MM/DD/yyyy");
+                        String stringDate = scanner.next();
+                        if (isValid(stringDate)) {
+                            Publish_Date = stringDate;
+                            break;
+                        }
+                    }
+
                     System.out.println("Description");
                     String Description = scanner.next();
                     Book book = new Book(ID, Author, Title, Genre, Price, Publish_Date, Description);
@@ -362,22 +398,25 @@ public class Main {
             else if(option == 2){
                 while (true) {
                     SearchAttributesMenu();
-                    System.out.println("Enter option number");
+                    System.out.println("Enter option number or any number to stop");
                     int optSearch = scanner.nextInt();
                     if (optSearch == 1) {
                         System.out.println("Enter Author name");
                         String Author = scanner.next();
                         resultSearch = SearchBooksByAuthor(Author, resultSearch);
+                        System.out.println("Done and Continue");
                     } else if (optSearch == 2) {
                         System.out.println("Enter Title name");
                         String Title = scanner.next();
                         resultSearch = SearchBooksByTitle(Title, resultSearch);
+                        System.out.println("Done and Continue");
                     } else if (optSearch == 3) {
                         System.out.println("Enter ID ");
                         String ID = scanner.next();
                         Book result = SearchBooksByID(ID, resultSearch);
                         resultSearch.clear();
                         resultSearch.add(result);
+                        System.out.println("Done and Continue");
                     } else if (optSearch == 4) {
                         GenreMenu();
                         String Genre = "";
@@ -398,28 +437,39 @@ public class Main {
                             } else System.out.println("please enter 1,2,3");
                         }
                         resultSearch = SearchBooksByGenre(Genre, resultSearch);
+                        System.out.println("Done and Continue");
                     } else if (optSearch == 5) {
                         System.out.println("Enter Price");
                         double Price = scanner.nextDouble();
                         resultSearch = SearchBooksByPrice(Price, resultSearch);
-
+                        System.out.println("Done and Continue");
                     } else if (optSearch == 6) {
-                        System.out.println("Enter Date");
-                        String stringDate = scanner.next();
-                        Date Publish_Date = new SimpleDateFormat("dd/MM/yyyy").parse(stringDate);
+                        String Publish_Date=null;
+                        while (true) {
+                            System.out.println("Enter Date in format MM/DD/yyyy");
+                            String stringDate = scanner.next();
+                            if (isValid(stringDate)) {
+                                Publish_Date = stringDate;
+                                break;
+                            }
+                        }
                         resultSearch = SearchBooksByPublishDate(Publish_Date, resultSearch);
+                        System.out.println("Done and Continue");
                     } else if (optSearch == 7) {
                         System.out.println("Enter sub sequence from description");
                         String description = scanner.next();
                         resultSearch = SearchBooksByDescription(description, resultSearch);
+                        System.out.println("Done and Continue");
                     } else {
                         if (resultSearch.size() > 0) {
                             System.out.println("Number of Books: " + resultSearch.size());
                             for (Book book : resultSearch) {
-                                System.out.println(book.toString());
+                                System.out.println(book);
                             }
+                            break;
                         } else {
                             System.out.println("No Books");
+                            break;
                         }
                     }
                 }
@@ -442,7 +492,7 @@ public class Main {
                 }
                 String Author=null,Title=null,Genre=null,Description=null;
                 double Price = 0.0;
-                Date Publish_Date = null;
+                String Publish_Date = null;
                 while (true){
                     System.out.println("Enter number for Attribute want change (if need stop change enter any number)");
                     AttributesMenu();
@@ -478,9 +528,15 @@ public class Main {
                         Price = scanner.nextDouble();
                     }
                     else if(opt==5){
-                        System.out.println("stringDate");
-                        String stringDate = scanner.next();
-                        Publish_Date=new SimpleDateFormat("dd/MM/yyyy").parse(stringDate);
+                        while (true) {
+                            System.out.println("Enter Date in format MM/DD/yyyy");
+                            String stringDate = scanner.next();
+                            if (isValid(stringDate)) {
+                                Publish_Date = stringDate;
+                                break;
+                            }
+                        }
+
                     }
                     else if(opt==6){
                         System.out.println("Description");
